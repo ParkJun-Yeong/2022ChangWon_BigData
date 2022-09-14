@@ -9,13 +9,14 @@ class Data(Dataset):
         super(Data, self).__init__()
 
         self.mode = mode
-        rainfall = pd.read_csv("./dataset/RainFall.csv")
+        self.window_size = 7
+        rainfall = pd.read_csv("./dataset/RainFall.csv", low_memory=False)
         rainfall.drop(['Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
-        waterfall = pd.read_csv("./dataset/WaterLevel.csv")
+        waterfall = pd.read_csv("./dataset/WaterLevel.csv", low_memory=False)
         waterfall.drop(['Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
         self.data = pd.concat([rainfall, waterfall], axis=1)
 
-        target = pd.read_csv("./dataset/Target.csv")
+        target = pd.read_csv("./dataset/Target.csv", low_memory=False)
         self.target = target['waterlevel']
 
         self.x_train, self.x_valid, self.x_test, self.y_train, self.y_valid, self.y_test = self.data_split()
@@ -35,16 +36,23 @@ class Data(Dataset):
         y = None
 
         if self.mode == 'train':
-            x = torch.tensor(self.x_train.iloc[idx].values)
-            y = torch.tensor(self.y_train.iloc[idx].values)
+            x = self.x_train
+            y = self.y_train
 
         if self.mode == 'valid':
-            x = torch.tensor(self.x_valid.iloc[idx].values)
-            y = torch.tensor(self.y_valid.iloc[idx].values)
+            x = self.x_valid
+            y = self.y_valid
 
         if self.mode == 'test':
-            x = torch.tensor(self.x_test.iloc[idx].values)
-            y = torch.tensor(self.y_test.iloc[idx].values)
+            x = self.x_test
+            y = self.y_test
+
+        try:
+            x = torch.tensor(x.iloc[idx:idx + self.window_size].values.astype(float), dtype=torch.float32)
+            y = torch.tensor(y.iloc[idx + self.window_size], dtype=torch.float32)
+        except IndexError:
+            x = torch.tensor(x.iloc[idx:len(x)].values.astype(float), dtype=torch.float32)
+            y = torch.tensor(y.iloc[len(x)], dtype=torch.float32)
 
         return x, y
 

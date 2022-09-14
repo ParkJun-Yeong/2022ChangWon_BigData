@@ -40,6 +40,9 @@ def train(tr_dataloader, vl_dataloader, epochs, model, loss_fn, optimizer):
         mean_val_loss = validation(vl_dataloader, model, loss_fn)
         writer.add_scalar("Mean valid loss per epoch", mean_val_loss, epoch)
 
+    writer.flush()
+    writer.close()
+
 
 def validation(dataloader, model, loss_fn):
     model.eval()
@@ -60,19 +63,20 @@ def validation(dataloader, model, loss_fn):
 
 if __name__ == '__main__':
     epoch = 100
-    window_size = 7             # batch_size, so a size of single input is (window_size, 1, 10). it is the same concept of 'seq_len' in nlp
+    window_size = 7             # seq_len in nlp (L hyper-parameter)
     learning_rate = 1e-1
     weight_decay = 2e-5
+    input_size = 10                     # feature 수, 즉 embedding size
 
-    model = LSTM_Model()
+    model = LSTM_Model(window_size, input_size)
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     train_dataset = Data(mode='train')
-    train_dataloader = DataLoader(train_dataset, batch_size=window_size, shuffle=False)
+    train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=False)
 
     valid_dataset = Data(mode='valid')
-    valid_dataloader = DataLoader(valid_dataset, batch_size=window_size, shuffle=False)
+    valid_dataloader = DataLoader(valid_dataset, batch_size=1, shuffle=False)
 
     test_dataset = Data(mode='test')
     test_dataloader = DataLoader(test_dataset, batch_size=window_size, shuffle=False)
