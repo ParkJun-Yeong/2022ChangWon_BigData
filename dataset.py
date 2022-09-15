@@ -11,13 +11,16 @@ class Data(Dataset):
         self.mode = mode
         self.window_size = window_size
         rainfall = pd.read_csv("./dataset/RainFall.csv", low_memory=False)
-        rainfall.drop(['Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
-        waterfall = pd.read_csv("./dataset/WaterLevel.csv", low_memory=False)
-        waterfall.drop(['Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
-        self.data = pd.concat([rainfall, waterfall], axis=1)
+        rainfall.drop(['Unnamed: 단위(mm)', 'Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
+        waterlevel = pd.read_csv("./dataset/WaterLevel.csv", low_memory=False)
+        waterlevel.drop(['Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
+        self.data = pd.concat([rainfall, waterlevel], axis=1)
 
-        target = pd.read_csv("./dataset/Target.csv", low_memory=False)
-        self.target = target['waterlevel']
+        # 창녕함안보 유입량이 더 패턴 있어 보이므로 타겟을 변경하기로 함.
+        # target = pd.read_csv("./dataset/Target.csv", low_memory=False)
+        # self.target = target['waterlevel']
+        target = pd.read_csv("./dataset/Target_discharge.csv", low_memory=False)
+        self.target = target['총유입량']
 
         self.x_train, self.x_valid, self.x_test, self.y_train, self.y_valid, self.y_test = self.data_split()
 
@@ -56,13 +59,14 @@ class Data(Dataset):
             x = self.x_test
             y = self.y_test
 
-        try:
-            x = x[idx:idx + self.window_size]
+        if (idx<len(x)) & (idx+self.window_size <len(x)):
+            tmp = torch.unsqueeze(y[idx:idx+self.window_size], 1)
+            x = torch.concat((x[idx:idx + self.window_size], tmp), axis=1)
             y = y[idx + self.window_size]
-        except IndexError:
-            print("INDEX::::::::::::   ", idx)
-            x = x[idx:len(x)]
-            y = y[len(x)]
+        elif (idx < len(x)) & (idx+self.window_size > len(x)):
+            tmp = torch.unsqueeze(y[idx:len(x)], 1)
+            x = torch.concat((x[idx:len(x)], tmp), axis=1)
+            y = y[len(x) + self.window_size]
 
         return x, y
 
