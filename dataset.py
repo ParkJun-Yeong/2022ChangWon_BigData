@@ -10,9 +10,12 @@ class Data(Dataset):
 
         self.mode = mode
         self.window_size = window_size
-        rainfall = pd.read_csv("./dataset/RainFall.csv", low_memory=False)
+
+        # rainfall = pd.read_csv("./dataset/RainFall.csv", low_memory=False)
+        rainfall = pd.read_csv("./dataset/scaled/RainFall_scaled.csv.csv", low_memory=False)
         rainfall.drop(['Unnamed: 단위(mm)', 'Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
-        waterlevel = pd.read_csv("./dataset/WaterLevel.csv", low_memory=False)
+        # waterlevel = pd.read_csv("./dataset/WaterLevel.csv", low_memory=False)
+        waterlevel = pd.read_csv("./dataset/scaled/WaterLevel_scaled.csv.csv", low_memory=False)
         waterlevel.drop(['Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
         self.data = pd.concat([rainfall, waterlevel], axis=1)
 
