@@ -12,17 +12,18 @@ class Data(Dataset):
         self.window_size = window_size
 
         # rainfall = pd.read_csv("./dataset/RainFall.csv", low_memory=False)
-        rainfall = pd.read_csv("./dataset/scaled/RainFall_scaled.csv", low_memory=False)
-        rainfall.drop(['Unnamed: 단위(mm)', 'Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
+        rainfall = pd.read_csv("./dataset/Rainy_season/rs_RainFall.csv", low_memory=False)
+        # rainfall.drop(['Unnamed: 단위(mm)', 'Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
+        rainfall = rainfall['길곡강수량']
         # waterlevel = pd.read_csv("./dataset/WaterLevel.csv", low_memory=False)
-        waterlevel = pd.read_csv("./dataset/scaled/WaterLevel_scaled.csv", low_memory=False)
+        waterlevel = pd.read_csv("./dataset/Rainy_season/rs_WaterLevel.csv", low_memory=False)
         waterlevel.drop(['Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
         self.data = pd.concat([rainfall, waterlevel], axis=1)
 
         # 창녕함안보 유입량이 더 패턴 있어 보이므로 타겟을 변경하기로 함.
         # target = pd.read_csv("./dataset/Target.csv", low_memory=False)
         # self.target = target['waterlevel']
-        target = pd.read_csv("./dataset/Target_discharge.csv", low_memory=False)
+        target = pd.read_csv("./dataset/Rainy_season/Target.csv", low_memory=False)
         self.target = target['총유입량']
 
         self.x_train, self.x_valid, self.x_test, self.y_train, self.y_valid, self.y_test = self.data_split()
