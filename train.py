@@ -32,7 +32,7 @@ def train(tr_dataloader, vl_dataloader, epochs, model, loss_fn, optimizer, input
 
             y_pred = model(X)
 
-            loss = loss_fn(y, y_pred)
+            loss = torch.sqrt(loss_fn(y, y_pred))
             tr_loss_hist += loss.item()
 
             optimizer.zero_grad()
@@ -40,7 +40,7 @@ def train(tr_dataloader, vl_dataloader, epochs, model, loss_fn, optimizer, input
             optimizer.step()
 
         mean_tr_loss = tr_loss_hist / float(i)
-        writer.add_scalar("Mean train loss per epoch", mean_tr_loss, epoch)
+        writer.add_scalar("Mean train RMSE loss per epoch", mean_tr_loss, epoch)
 
         now = datetime.now()
         torch.save({
@@ -52,7 +52,7 @@ def train(tr_dataloader, vl_dataloader, epochs, model, loss_fn, optimizer, input
         # torch.save(model.state_dict(), os.path.join("./saved_model", now.strftime("%Y-%m-%d-%H-%M") + "-e" + str(epoch) + ".pt"))
 
         mean_val_loss = validation(vl_dataloader, model, loss_fn)
-        writer.add_scalar("Mean valid loss per epoch", mean_val_loss, epoch)
+        writer.add_scalar("Mean valid RMSE loss per epoch", mean_val_loss, epoch)
 
     writer.flush()
     writer.close()
@@ -71,7 +71,7 @@ def validation(dataloader, model, loss_fn):
             y = y.to(device)
 
             y_pred = model(X)
-            loss = loss_fn(y, y_pred)
+            loss = torch.sqrt(loss_fn(y, y_pred))
             val_loss_hist += loss.item()
 
         val_loss = val_loss_hist / float(i)
@@ -82,7 +82,7 @@ def validation(dataloader, model, loss_fn):
 
 
 if __name__ == '__main__':
-    epoch = 100
+    epoch = 200
     window_size = 5             # seq_len in nlp (L hyper-parameter)
     learning_rate = 1e-2
     weight_decay = 2e-5
