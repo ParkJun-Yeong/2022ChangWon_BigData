@@ -87,20 +87,21 @@ if __name__ == '__main__':
     learning_rate = 1e-2
     weight_decay = 2e-5
     input_size = 11                     # feature 수, 즉 embedding size
+    batch_size = 6
 
-    model = LSTM_Model(window_size, input_size).to(device)
-    print(summary(model, (1,5,11)))
+    model = LSTM_Model(window_size, input_size, batch_size).to(device)
+    print(summary(model, (batch_size,5,11)))
 
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     train_dataset = Data(mode='train', window_size=window_size)
-    train_dataloader = DataLoader(train_dataset, batch_size=1, shuffle=False)
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
 
     valid_dataset = Data(mode='valid', window_size=window_size)
-    valid_dataloader = DataLoader(valid_dataset, batch_size=1, shuffle=False)
+    valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
     test_dataset = Data(mode='test', window_size=window_size)
-    test_dataloader = DataLoader(test_dataset, batch_size=window_size, shuffle=False)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     train(train_dataloader, valid_dataloader, epoch, model, loss_fn, optimizer, input_size)
