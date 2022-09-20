@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
-
+import os, sys
 
 class Data(Dataset):
     def __init__(self, mode, window_size):
@@ -10,7 +10,6 @@ class Data(Dataset):
 
         self.mode = mode
         self.window_size = window_size
-
         # rainfall = pd.read_csv("./dataset/RainFall.csv", low_memory=False)
         rainfall = pd.read_csv("./dataset/Rainy_season/rs_RainFall.csv", low_memory=False)
         # rainfall.drop(['Unnamed: 단위(mm)', 'Unnamed: 0', 'date', 'time'], axis=1, inplace=True)
@@ -63,15 +62,22 @@ class Data(Dataset):
             x = self.x_test
             y = self.y_test
 
-        if (idx<len(x)) & (idx+self.window_size <len(x)):
+        if (idx < len(x)) & (idx+self.window_size <len(x)):
             tmp = torch.unsqueeze(y[idx:idx+self.window_size], 1)
-            x = torch.concat((x[idx:idx + self.window_size], tmp), axis=1)
+            # print('temtem', tmp.shape)
+            # print('X before concat :', x.shape)
+            # x = torch.concat((x[idx:idx + self.window_size], tmp), axis=1)
+            x = x[idx : idx + self.window_size]
+            # print('X in if :', x.shape)
             y = y[idx + self.window_size]
         elif (idx < len(x)) & (idx+self.window_size > len(x)):
             tmp = torch.unsqueeze(y[idx:len(x)], 1)
             x = torch.concat((x[idx:len(x)], tmp), axis=1)
+            # print('X in elif :', x.shape)
             y = y[len(x) + self.window_size]
 
+        # print('x : ',x.shape)
+        # print('y : ',y.shape)
         return x, y
 
     def data_split(self):

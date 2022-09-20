@@ -27,7 +27,7 @@ class LSTM_Model(nn.Module):
         self.window_size = window_size
         self.input_size = input_size            # the number of input features
         self.hidden_size = 30
-        self.num_layers = 1
+        self.num_layers = 2
         self.lstm = nn.LSTM(input_size=input_size, hidden_size=self.hidden_size, num_layers=self.num_layers, batch_first=True).to(device)
         self.fc = nn.Linear(in_features=self.hidden_size, out_features=1, bias=True).to(device)
 

@@ -6,7 +6,6 @@ class RMSELoss(torch.nn.Module):
         super(RMSELoss, self).__init__()
 
     def forward(self, x, y):
-        x = x.squeeze()
         criterion = nn.MSELoss()
         
         eps = 1e-6
