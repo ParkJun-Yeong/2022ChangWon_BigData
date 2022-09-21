@@ -27,6 +27,8 @@ class Data(Dataset):
 
         self.x_train, self.x_valid, self.x_test, self.y_train, self.y_valid, self.y_test = self.data_split()
 
+
+
         self.x_train = torch.tensor(self.x_train.values, dtype=torch.float32)
         self.x_valid = torch.tensor(self.x_valid.values, dtype=torch.float32)
         self.x_test = torch.tensor(self.x_test.values, dtype=torch.float32)
@@ -38,13 +40,13 @@ class Data(Dataset):
 
     def __len__(self):
         if self.mode == 'train':
-            return len(self.x_train)
+            return len(self.x_train) - self.window_size
 
         if self.mode == 'valid':
-            return len(self.x_valid)
+            return len(self.x_valid) - self.window_size
 
         if self.mode == 'test':
-            return len(self.x_test)
+            return len(self.x_test) - self.window_size
 
     def __getitem__(self, idx):
         x = None
@@ -70,11 +72,19 @@ class Data(Dataset):
             x = x[idx : idx + self.window_size]
             # print('X in if :', x.shape)
             y = y[idx + self.window_size]
-        elif (idx < len(x)) & (idx+self.window_size > len(x)):
-            tmp = torch.unsqueeze(y[idx:len(x)], 1)
-            x = torch.concat((x[idx:len(x)], tmp), axis=1)
-            # print('X in elif :', x.shape)
-            y = y[len(x) + self.window_size]
+
+        elif idx > (len(x) - self.window_size):
+            x = None
+            y = None
+
+
+        # elif (idx < len(x)) & (idx+self.window_size > len(x)):
+        #     tmp = torch.unsqueeze(y[idx:len(x)], 1)
+        #     x = torch.concat((x[idx:len(x)], tmp), axis=1)
+        #     # print('X in elif :', x.shape)
+        #     y = y[len(x) + self.window_size]
+
+        
 
         # print('x : ',x.shape)
         # print('y : ',y.shape)

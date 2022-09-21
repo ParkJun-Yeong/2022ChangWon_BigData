@@ -128,7 +128,7 @@ def test(dataloader, model, loss_fn):
 
 
 if __name__ == '__main__':
-    epoch = 100
+    epoch = 500
     window_size = 5             # seq_len in nlp (L hyper-parameter)
     learning_rate = 1e-2
     weight_decay = 2e-5
