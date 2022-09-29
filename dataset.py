@@ -5,11 +5,12 @@ import torch
 
 
 class Data(Dataset):
-    def __init__(self, mode, window_size):
+    def __init__(self, mode, window_size, input_size):
         super(Data, self).__init__()
 
         self.mode = mode
         self.window_size = window_size
+        self.input_size = input_size
 
         # rainfall = pd.read_csv("./dataset/RainFall.csv", low_memory=False)
 
@@ -30,19 +31,34 @@ class Data(Dataset):
         # 창녕함안보 유입량이 더 패턴 있어 보이므로 타겟을 변경하기로 함.
         # target = pd.read_csv("./dataset/Target.csv", low_memory=False)
         # self.target = target['waterlevel']
-        target = pd.read_csv("./dataset/Target_discharge.csv", low_memory=False)
-        self.target = target['총유입량']
 
-        self.x_train, self.x_valid, self.x_test, self.y_train, self.y_valid, self.y_test = self.data_split()
+        # target = pd.read_csv("./dataset/Target_discharge.csv", low_memory=False)
+        # self.target = target['총유입량']
 
-        self.x_train = torch.tensor(self.x_train.values, dtype=torch.float32)
-        self.x_valid = torch.tensor(self.x_valid.values, dtype=torch.float32)
-        self.x_test = torch.tensor(self.x_test.values, dtype=torch.float32)
+        inflow = pd.read_csv("./dataset/220928/Target_inflow_scaled.csv", low_memory=False).values.reshape(-1)
+        self.inflow = inflow
 
-        self.y_train = torch.tensor(self.y_train.values, dtype=torch.float32)
-        self.y_valid = torch.tensor(self.y_valid.values, dtype=torch.float32)
-        self.y_test = torch.tensor(self.y_test.values, dtype=torch.float32)
 
+        # self.x_train, self.x_valid, self.x_test, self.y_train, self.y_valid, self.y_test = self.data_split()
+        #
+        # self.x_train = torch.tensor(self.x_train.values, dtype=torch.float32)
+        # self.x_valid = torch.tensor(self.x_valid.values, dtype=torch.float32)
+        # self.x_test = torch.tensor(self.x_test.values, dtype=torch.float32)
+        #
+        # self.y_train = torch.tensor(self.y_train.values, dtype=torch.float32)
+        # self.y_valid = torch.tensor(self.y_valid.values, dtype=torch.float32)
+        # self.y_test = torch.tensor(self.y_test.values, dtype=torch.float32)
+
+
+        length = len(self.inflow)
+        self.x_train = torch.tensor(self.inflow[:int(length*0.7)], dtype=torch.float32)
+        self.y_train = self.x_train
+
+        self.x_valid = torch.tensor(self.inflow[int(length*0.7):int(length*0.9)], dtype=torch.float32)
+        self.y_valid = self.x_valid
+
+        self.x_test = torch.tensor(self.inflow[int(length*0.9):], dtype=torch.float32)
+        self.y_test = self.x_test
 
     def __len__(self):
         if self.mode == 'train':
@@ -70,9 +86,18 @@ class Data(Dataset):
             x = self.x_test
             y = self.y_test
 
-        if (idx< len(x)) & (idx+self.window_size < len(x)):
-            x = x[idx:idx + self.window_size]
-            y = y[idx + self.window_size]
+        if (idx< len(x)) & (idx+self.window_size*self.input_size < len(x)):
+            # x = x[idx:idx + self.window_size]
+            # y = y[idx + self.window_size]
+
+            tmp_x = []
+            tmp_y = []
+            for i in range(self.window_size):
+                tmp_x.append(x[idx+i:idx+i+self.input_size].unsqueeze(0))
+                tmp_y.append(y[idx+i+self.input_size].unsqueeze(0))
+
+            x = torch.concat(tmp_x)
+            y = torch.concat(tmp_y)
         else:
             x = torch.rand(5,1)
             y = 0

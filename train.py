@@ -96,26 +96,26 @@ def validation(dataloader, model, loss_fn):
 
 
 if __name__ == '__main__':
-    epoch = 100
+    epoch = 400
     window_size = 5             # seq_len in nlp (L hyper-parameter)
-    learning_rate = 1e-1
+    learning_rate = 1e-4
     weight_decay = 2e-5
     input_size = 5                     # feature 수, 즉 embedding size
     batch_size = 1
 
-    model = LSTM_Model(window_size=window_size, input_size=input_size, hidden_size=15, batch_size=batch_size).to(device)
+    model = LSTM_Model(window_size=window_size, input_size=input_size, hidden_size=10, batch_size=batch_size).to(device)
     # print(summary(model, (window_size,input_size), batch_dim=batch_size))
 
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
-    train_dataset = Data(mode='train', window_size=window_size)
+    train_dataset = Data(mode='train', window_size=window_size, input_size=input_size)
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
 
-    valid_dataset = Data(mode='valid', window_size=window_size)
+    valid_dataset = Data(mode='valid', window_size=window_size, input_size=input_size)
     valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
-    test_dataset = Data(mode='test', window_size=window_size)
+    test_dataset = Data(mode='test', window_size=window_size, input_size=input_size)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     train(train_dataloader, valid_dataloader, epoch, model, loss_fn, optimizer, input_size)

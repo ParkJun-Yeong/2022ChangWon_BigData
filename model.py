@@ -33,7 +33,7 @@ class LSTM_Model(nn.Module):
         self.num_layers = 1
         self.batch_size = batch_size
         self.lstm = nn.LSTM(input_size=input_size, hidden_size=self.hidden_size, num_layers=self.num_layers, batch_first=True).to(device)
-        self.fc = nn.Linear(in_features=self.hidden_size, out_features=1, bias=True).to(device)
+        self.fc = nn.Linear(in_features=self.hidden_size, out_features=5, bias=True).to(device)
 
     def forward(self, X):
         h0 = torch.randn(self.num_layers, self.batch_size, self.hidden_size).to(device)
@@ -43,14 +43,16 @@ class LSTM_Model(nn.Module):
         # h = torch.squeeze(h)
         y_pred = self.fc(output)
 
-        if self.num_layers > 1:
-            y_pred = torch.mean(y_pred)
+        y_pred = torch.reshape(y_pred, (1,5))
+
+        # if self.num_layers > 1:
+        #     y_pred = torch.mean(y_pred)
 
         # if len(y_pred.size()) < 1:
         #     y_pred = y_pred.unsqueeze(0)
 
-        while len(y_pred.size()) > 1:
-            y_pred = y_pred.squeeze(-1)
+        # while len(y_pred.size()) > 1:
+        #     y_pred = y_pred.squeeze(-1)
 
         return y_pred
 
